@@ -1,0 +1,43 @@
+services:
+  azurite:
+    image: modestsnake/coffeenchill-azurite:v1.0
+    container_name: azurite
+    command: >
+      azurite -l /data
+      --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+      --skipApiVersionCheck
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite-data:/data
+    networks:
+      - coffeenchill-net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 10001 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  functions:
+    image: st10477821/coffeenchill-functions:v2.0
+    container_name: functions
+    depends_on:
+      azurite:
+        condition: service_healthy
+    ports:
+      - "7120:80"
+    environment:
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
+    networks:
+      - coffeenchill-net
+    restart: on-failure
+
+networks:
+  coffeenchill-net:
+    driver: bridge
+
+volumes:
+  azurite-data:
