@@ -51,4 +51,26 @@ builder.Services.AddSingleton(sp =>
     return new QueueClient(connectionString, "order-processing-queue", options);
 });
 
+// ---- Order tracking: shared Table and Queue service clients ----
+// Used by ProcessOrderQueueFunction (writes the Orders table) and
+// OrderStatusFunctions (reads the Orders table and the poison queue).
+builder.Services.AddSingleton(sp =>
+{
+    var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+    ?? "UseDevelopmentStorage=true";
+    return new TableServiceClient(connectionString);
+});
+builder.Services.AddSingleton(sp =>
+{
+    var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+    ?? "UseDevelopmentStorage=true";
+    // Default (no) message encoding on purpose: we peek raw poison messages
+    // and decode the Base64 text ourselves so a bad message can never crash the endpoint.
+    return new QueueServiceClient(connectionString);
+});
+
+var startupConnection = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
+    ?? "UseDevelopmentStorage=true";
+new QueueClient(startupConnection, "order-processing-queue").CreateIfNotExists();
+
 builder.Build().Run();
