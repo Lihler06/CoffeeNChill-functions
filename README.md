@@ -44,4 +44,21 @@ Environment variable usage
 Test coverage across all endpoint. 
 
 
+Part 2: Docker Compose Orchestration
+Contributor:ST10477821
+ What it does
+A single `docker-compose.yml` in the repo root starts the full stack:
+
+ Service - Image (Docker Hub) -Purpose 
+ azurite  `modestsnake/coffeenchill-azurite:v1.0` | Emulates Azure Tables, Blobs and Queues locally |
+ functions  `st10477821/coffeenchill-functions:v2.0` | Azure Functions host with the HTTP and Queue triggers |
+
+Both images are pulled from Docker Hub. The file has no `build:` paths.
+
+Configuration
+- Custom bridge network (`coffeenchill-net`) lets the Functions container reach Azurite by its service name.
+- Named volume(`azurite-data`) keeps Azurite data when containers restart.
+- Health checkon Azurite, with the Functions service set to wait for it before it starts.
+- Connection string** is passed through the `AzureWebJobsStorage` environment variable and points to the `azurite` host, not `127.0.0.1`.
+- Ports:Functions are exposed on `7120`, and Azurite on `10000`, `10001` and `10002`.
 
