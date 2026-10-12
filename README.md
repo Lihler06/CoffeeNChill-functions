@@ -43,7 +43,6 @@ Environment variable usage
 (l(baseUrl)
 Test coverage across all endpoint. 
 
-
 Part 2: Docker Compose Orchestration
 Contributor:ST10477821
  What it does
@@ -59,6 +58,14 @@ Configuration
 - Custom bridge network (`coffeenchill-net`) lets the Functions container reach Azurite by its service name.
 - Named volume(`azurite-data`) keeps Azurite data when containers restart.
 - Health checkon Azurite, with the Functions service set to wait for it before it starts.
-- Connection string** is passed through the `AzureWebJobsStorage` environment variable and points to the `azurite` host, not `127.0.0.1`.
+- Connection string is passed through the `AzureWebJobsStorage` environment variable and points to the `azurite` host, not `127.0.0.1`.
+  
+ How to run
+Make sure Docker Desktop is running, then from the repo root:
+docker compose up -d
+The API is then available at `http://localhost:7120/api`.
+To stop the stack:
+docker compose down
+Add `-v` to also delete the stored Azurite data.  
 - Ports:Functions are exposed on `7120`, and Azurite on `10000`, `10001` and `10002`.
 
