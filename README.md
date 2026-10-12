@@ -59,6 +59,7 @@ Configuration
 - Named volume(`azurite-data`) keeps Azurite data when containers restart.
 - Health checkon Azurite, with the Functions service set to wait for it before it starts.
 - Connection string is passed through the `AzureWebJobsStorage` environment variable and points to the `azurite` host, not `127.0.0.1`.
+- - Ports:Functions are exposed on `7120`, and Azurite on `10000`, `10001` and `10002`.
   
  How to run
 Make sure Docker Desktop is running, then from the repo root:
@@ -67,5 +68,16 @@ The API is then available at `http://localhost:7120/api`.
 To stop the stack:
 docker compose down
 Add `-v` to also delete the stored Azurite data.  
-- Ports:Functions are exposed on `7120`, and Azurite on `10000`, `10001` and `10002`.
+ 
+
+  How to test
+1.GET http://localhost:7120/api/menu returns the menu as JSON.
+2. POST http://localhost:7120/api/orders/queue with a JSON order body places the order on the queue.
+3.GET http://localhost:7120/api/orders/status/{orderId} shows the status moving Received, Preparing, Ready, Collected.
+
+The Postman collections in the repo can be used for these tests.
+
+
+
+
 
